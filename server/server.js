@@ -14,7 +14,7 @@ const app = express();
 // Middlewares
 app.use(morgan("tiny")); // Uses morgan to log every request
 app.use(express.json()); // Uses express.json as body parser for every request
-// app.use("/api", routes); // Uses routes for requests to /api
+app.use("/api", routes); // Uses routes for requests to /api
 
 // Error middleware
 app.use((err, req, res, next) => {
