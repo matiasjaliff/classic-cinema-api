@@ -8,7 +8,7 @@ const db = require("./db");
 const models = require("./models");
 
 // Loads enviroment variables
-const { PORT } = require("./config");
+const { port } = require("./config");
 
 const app = express();
 
@@ -30,6 +30,6 @@ db.sync({ alter: true }) // Syncrhonizes the database
   )
   .then(() =>
     // Binds and listens for connections on the specified port
-    app.listen(PORT, () => console.log(`Server listening on port ${PORT}`))
+    app.listen(port, () => console.log(`Server listening on port ${port}`))
   )
   .catch((err) => console.log(err));

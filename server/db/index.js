@@ -2,10 +2,10 @@
 const Sequelize = require("sequelize");
 
 // Loads enviroment variables
-const { DB_NAME } = require("../config");
+const { dbName } = require("../config");
 
 // Creates a Sequelize instance to connect to cinemadb
-const db = new Sequelize(DB_NAME, null, null, {
+const db = new Sequelize(dbName, null, null, {
   host: "localhost",
   dialect: "postgres",
   logging: false,

@@ -1,3 +1,3 @@
 # Classic Cinema
 
-Nothing yet.
+Movie catalog with social network functionalities.
