@@ -14,7 +14,7 @@ Liked_Movie.init(
     },
     movie_id: {
       type: S.DataTypes.INTEGER,
-      allowNull: false,
+      // allowNull: false,
     },
   },
   {

@@ -4,7 +4,6 @@ const axios = require("axios");
 
 // Load enviroment variables
 const { tmdbUrl, tmdbToken } = require("../config");
-const { response } = require("express");
 
 const tmdbRouter = express.Router();
 
@@ -25,7 +24,10 @@ tmdbRouter.get("/configuration", (req, res, next) => {
       const tmdbConfig = response.data;
       res.status(200).send(tmdbConfig);
     })
-    .catch((error) => console.error(error.response.data));
+    .catch((error) => {
+      console.error(error.response.data);
+      next();
+    });
 });
 
 // 02. Get genres list
@@ -37,7 +39,10 @@ tmdbRouter.get("/genres", (req, res, next) => {
       const genres = response.data;
       res.status(200).send(genres);
     })
-    .catch((error) => console.error(error.response.data));
+    .catch((error) => {
+      console.error(error.response.data);
+      next();
+    });
 });
 
 // 03. Search movies
@@ -52,7 +57,10 @@ tmdbRouter.get("/search", (req, res, next) => {
       const movies = response.data;
       res.status(200).send(movies);
     })
-    .catch((error) => console.error(error.response.data));
+    .catch((error) => {
+      console.error(error.response.data);
+      next();
+    });
 });
 
 // 04. Get movie details
@@ -65,7 +73,10 @@ tmdbRouter.get("/:movieId", (req, res, next) => {
       const movieDetails = response.data;
       res.status(200).send(movieDetails);
     })
-    .catch((error) => console.error(error.response.data));
+    .catch((error) => {
+      console.error(error.response.data);
+      next();
+    });
 });
 
 // 05. Get recommendations
@@ -81,7 +92,10 @@ tmdbRouter.get("/:movieId/recommendations", (req, res, next) => {
       const movieRecommendations = response.data;
       res.status(200).send(movieRecommendations);
     })
-    .catch((error) => console.error(error.response.data));
+    .catch((error) => {
+      console.error(error.response.data);
+      next();
+    });
 });
 
 // 06. Get movie images
@@ -89,15 +103,15 @@ tmdbRouter.get("/:movieId/images", (req, res, next) => {
   const movieId = req.params.movieId;
   const { language } = req.query;
   axios
-    .get(
-      `${tmdbUrl}/movie/${movieId}/images?language=${language}`,
-      authHeader
-    )
+    .get(`${tmdbUrl}/movie/${movieId}/images?language=${language}`, authHeader)
     .then((response) => {
       const movieImages = response.data;
       res.status(200).send(movieImages);
     })
-    .catch((error) => console.error(error.response.data));
+    .catch((error) => {
+      console.error(error.response.data);
+      next();
+    });
 });
 
 // 07. Get movie videos
@@ -105,15 +119,15 @@ tmdbRouter.get("/:movieId/videos", (req, res, next) => {
   const movieId = req.params.movieId;
   const { language } = req.query;
   axios
-    .get(
-      `${tmdbUrl}/movie/${movieId}/videos?language=${language}`,
-      authHeader
-    )
+    .get(`${tmdbUrl}/movie/${movieId}/videos?language=${language}`, authHeader)
     .then((response) => {
       const movieVideos = response.data;
       res.status(200).send(movieVideos);
     })
-    .catch((error) => console.error(error.response.data));
+    .catch((error) => {
+      console.error(error.response.data);
+      next();
+    });
 });
 
 module.exports = tmdbRouter;

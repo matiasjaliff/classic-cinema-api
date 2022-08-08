@@ -3,49 +3,238 @@ const express = require("express");
 
 // Own modules
 const User = require("../models/User");
+const Liked_Movie = require("../models/Liked_Movie");
+const Liked_Genre = require("../models/Liked_Genre");
+const Follow = require("../models/Follow");
 
 const usersRouter = express.Router();
 
-usersRouter.post("/", (req, res, next) => {
-  const { first_names, last_names, email, password, allow_notifications } = req.body;
+// Check user existence
+usersRouter.all("/:userId*", (req, res, next) => {
+  const userId = req.params.userId;
+  User.findByPk(userId)
+    .then((user) => (user ? next() : res.status(404).send("USER NOT FOUND")))
+    .catch((error) => res.status(400).send(error));
+});
+
+// Requests
+
+// A. Users
+
+// A.1. Get all users
+usersRouter.get("/", (req, res) => {
+  User.findAll()
+    .then((users) => res.status(200).send(users))
+    .catch((error) => res.status(500).send(error));
+});
+
+// A.2. Get user by id
+usersRouter.get("/:userId", (req, res) => {
+  const userId = req.params.userId;
+  User.findByPk(userId)
+    .then((user) => res.status(200).send(user))
+    .catch((error) => res.status(500).send(error));
+});
+
+// A.3. Create new user
+usersRouter.post("/", (req, res) => {
+  const { first_names, last_names, email, password, allow_notifications } =
+    req.body;
   User.findOrCreate({
     where: { email: email },
     defaults: { first_names, last_names, email, password, allow_notifications },
   })
-    .then(([user, created]) => {
-      console.log("CREATED: ", created);
-      console.log("USER: ", user);
-      created ? res.status(201).send(user) : res.status(400).send(user);
-    })
-    .catch((error) => {
-      console.error(error);
-      next();
-    });
+    .then(([user, created]) =>
+      created ? res.status(201).send(user) : res.status(409).send(user)
+    )
+    .catch((error) => res.status(500).send(error));
 });
 
-usersRouter.get("/", (req, res, next) => {
-  User.findAll()
-    .then((users) => {
-      console.log(users);
-      res.status(200).send(users);
-    })
-    .catch((error) => {
-      console.error(error);
-      next();
-    });
+// A.4. Modify user
+usersRouter.put("/:userId", (req, res) => {
+  const userId = req.params.userId;
+  const { first_names, last_names, email, password, allow_notifications } =
+    req.body;
+  User.update(
+    { first_names, last_names, email, password, allow_notifications },
+    { where: { user_id: userId } }
+  )
+    .then(() => User.findByPk(userId))
+    .then((updatedUser) => res.status(200).send(updatedUser))
+    .catch((error) => res.status(500).send(error));
 });
 
-usersRouter.get("/:id", (req, res, next) => {
-  const user_id = req.params.id;
-  User.findByPk(user_id)
-    .then((user) => {
-      console.log(user);
-      user ? res.status(200).send(user) : res.sendStatus(404);
+// A.5. Delete user
+usersRouter.delete("/:userId", (req, res) => {
+  const userId = req.params.userId;
+  let deletedUser = {};
+  User.findByPk(userId)
+    .then((user) => (deletedUser = user))
+    .then(() => Liked_Movie.destroy({ where: { user_id: userId } }))
+    .then(() => Liked_Genre.destroy({ where: { user_id: userId } }))
+    .then(() => Follow.destroy({ where: { follower_id: userId } }))
+    .then(() => Follow.destroy({ where: { followed_id: userId } }))
+    .then(() => User.destroy({ where: { user_id: userId } }))
+    .then(() => res.status(200).send(deletedUser))
+    .catch((error) => res.status(500).send(error));
+});
+
+// B. User liked movies
+
+// B.1. Get all liked movies
+usersRouter.get("/:userId/movies", (req, res) => {
+  const userId = req.params.userId;
+  Liked_Movie.findAll({
+    where: { user_id: userId },
+  })
+    .then((likedMovies) => {
+      res.status(200).send(likedMovies);
     })
-    .catch((error) => {
-      console.dir(error);
-      next();
-    });
+    .catch((error) => res.status(500).send(error));
+});
+
+// B.2. Add liked movie
+usersRouter.post("/:userId/movies", (req, res) => {
+  const userId = req.params.userId;
+  const { movieId } = req.query;
+  Liked_Movie.findOrCreate({
+    where: { user_id: userId, movie_id: movieId },
+    defaults: { user_id: userId, movie_id: movieId },
+  })
+    .then(([likedMovie, created]) => {
+      created
+        ? res.status(201).send(likedMovie)
+        : res.status(409).send(likedMovie);
+    })
+    .catch((error) => res.status(500).send(error));
+});
+
+// B.3. Remove liked movie
+usersRouter.delete("/:userId/movies", (req, res) => {
+  const userId = req.params.userId;
+  const { movieId } = req.query;
+  Liked_Movie.findOne({
+    where: { user_id: userId, movie_id: movieId },
+  })
+    .then((likedMovie) => {
+      if (likedMovie) {
+        Liked_Movie.destroy({
+          where: { user_id: userId, movie_id: movieId },
+        }).then(() => res.status(200).send(likedMovie));
+      } else {
+        res.status(404).send("LIKED MOVIE NOT FOUND");
+      }
+    })
+    .catch((error) => res.status(500).send(error));
+});
+
+// C. User liked genres
+
+// C.1. Get all liked genres
+usersRouter.get("/:userId/genres", (req, res) => {
+  const userId = req.params.userId;
+  Liked_Genre.findAll({
+    where: { user_id: userId },
+  })
+    .then((likedGenres) => {
+      res.status(200).send(likedGenres);
+    })
+    .catch((error) => res.status(500).send(error));
+});
+
+// C.2. Add liked genre
+usersRouter.post("/:userId/genres", (req, res) => {
+  const userId = req.params.userId;
+  const { genreId } = req.query;
+  Liked_Genre.findOrCreate({
+    where: { user_id: userId, genre_id: genreId },
+    defaults: { user_id: userId, genre_id: genreId },
+  })
+    .then(([likedGenre, created]) => {
+      created
+        ? res.status(201).send(likedGenre)
+        : res.status(409).send(likedGenre);
+    })
+    .catch((error) => res.status(500).send(error));
+});
+
+// C.3. Remove liked genre
+usersRouter.delete("/:userId/genres", (req, res) => {
+  const userId = req.params.userId;
+  const { genreId } = req.query;
+  Liked_Genre.findOne({
+    where: { user_id: userId, genre_id: genreId },
+  })
+    .then((likedGenre) => {
+      if (likedGenre) {
+        Liked_Genre.destroy({
+          where: { user_id: userId, genre_id: genreId },
+        }).then(() => res.status(200).send(likedGenre));
+      } else {
+        res.status(404).send("LIKED GENRE NOT FOUND");
+      }
+    })
+    .catch((error) => res.status(500).send(error));
+});
+
+// D. Followed users
+
+// D.1. Get all followed users
+usersRouter.get("/:userId/follows", (req, res) => {
+  const userId = req.params.userId;
+  Follow.findAll({
+    where: { follower_id: userId },
+  })
+    .then((follows) => {
+      res.status(200).send(follows);
+    })
+    .catch((error) => res.status(500).send(error));
+});
+
+// D.2. Add followed user
+usersRouter.post("/:userId/follows", (req, res) => {
+  const userId = req.params.userId;
+  const { followedId } = req.query;
+  if (userId === followedId) {
+    res.status(409).send("USER CAN NOT FOLLOW ITSELF.");
+  } else {
+    User.findByPk(followedId)
+      .then((response) => (response ? true : false))
+      .then((followedUserExists) => {
+        if (followedUserExists) {
+          Follow.findOrCreate({
+            where: { follower_id: userId, followed_id: followedId },
+            defaults: { follower_id: userId, followed_id: followedId },
+          }).then(([follow, created]) => {
+            created
+              ? res.status(201).send(follow)
+              : res.status(409).send(follow);
+          });
+        } else {
+          res.status(404).send("USER TO FOLLOW NOT FOUND.");
+        }
+      })
+      .catch((error) => res.status(500).send(error));
+  }
+});
+
+// D.3. Remove followed user
+usersRouter.delete("/:userId/follows", (req, res) => {
+  const userId = req.params.userId;
+  const { followedId } = req.query;
+  Follow.findOne({
+    where: { follower_id: userId, followed_id: followedId },
+  })
+    .then((follow) => {
+      if (follow) {
+        Follow.destroy({
+          where: { follower_id: userId, followed_id: followedId },
+        }).then(() => res.status(200).send(follow));
+      } else {
+        res.status(404).send("FOLLOW-UP NOT FOUND");
+      }
+    })
+    .catch((error) => res.status(500).send(error));
 });
 
 module.exports = usersRouter;
