@@ -4,25 +4,25 @@ const S = require("sequelize");
 // Own modules
 const db = require("../db");
 
-class Liked_Genre extends S.Model {}
-Liked_Genre.init(
+class LikedMovie extends S.Model {}
+LikedMovie.init(
   {
-    liked_genre_id: {
+    liked_movie_id: {
       type: S.DataTypes.INTEGER,
       autoIncrement: true,
       primaryKey: true,
     },
-    genre_id: {
+    movie_id: {
       type: S.DataTypes.INTEGER,
-      allowNull: false,
+      // allowNull: false,
     },
   },
   {
     sequelize: db,
-    modelName: "liked_genre", // Model name MUST be in lowercase
+    modelName: "liked_movie", // Model name MUST be in lowercase
     createdAt: 'created_at', // Renames field
     updatedAt: 'updated_at', // Renames field
   }
 );
 
-module.exports = Liked_Genre;
+module.exports = LikedMovie;

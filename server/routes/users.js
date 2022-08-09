@@ -3,8 +3,8 @@ const express = require("express");
 
 // Own modules
 const User = require("../models/User");
-const Liked_Movie = require("../models/Liked_Movie");
-const Liked_Genre = require("../models/Liked_Genre");
+const LikedMovie = require("../models/LikedMovie");
+const LikedGenre = require("../models/LikedGenre");
 const Follow = require("../models/Follow");
 
 const usersRouter = express.Router();
@@ -70,8 +70,8 @@ usersRouter.delete("/:userId", (req, res) => {
   let deletedUser = {};
   User.findByPk(userId)
     .then((user) => (deletedUser = user))
-    .then(() => Liked_Movie.destroy({ where: { user_id: userId } }))
-    .then(() => Liked_Genre.destroy({ where: { user_id: userId } }))
+    .then(() => LikedMovie.destroy({ where: { user_id: userId } }))
+    .then(() => LikedGenre.destroy({ where: { user_id: userId } }))
     .then(() => Follow.destroy({ where: { follower_id: userId } }))
     .then(() => Follow.destroy({ where: { followed_id: userId } }))
     .then(() => User.destroy({ where: { user_id: userId } }))
@@ -84,7 +84,7 @@ usersRouter.delete("/:userId", (req, res) => {
 // B.1. Get all liked movies
 usersRouter.get("/:userId/movies", (req, res) => {
   const userId = req.params.userId;
-  Liked_Movie.findAll({
+  LikedMovie.findAll({
     where: { user_id: userId },
   })
     .then((likedMovies) => {
@@ -97,7 +97,7 @@ usersRouter.get("/:userId/movies", (req, res) => {
 usersRouter.post("/:userId/movies", (req, res) => {
   const userId = req.params.userId;
   const { movieId } = req.query;
-  Liked_Movie.findOrCreate({
+  LikedMovie.findOrCreate({
     where: { user_id: userId, movie_id: movieId },
     defaults: { user_id: userId, movie_id: movieId },
   })
@@ -113,12 +113,12 @@ usersRouter.post("/:userId/movies", (req, res) => {
 usersRouter.delete("/:userId/movies", (req, res) => {
   const userId = req.params.userId;
   const { movieId } = req.query;
-  Liked_Movie.findOne({
+  LikedMovie.findOne({
     where: { user_id: userId, movie_id: movieId },
   })
     .then((likedMovie) => {
       if (likedMovie) {
-        Liked_Movie.destroy({
+        LikedMovie.destroy({
           where: { user_id: userId, movie_id: movieId },
         }).then(() => res.status(200).send(likedMovie));
       } else {
@@ -133,7 +133,7 @@ usersRouter.delete("/:userId/movies", (req, res) => {
 // C.1. Get all liked genres
 usersRouter.get("/:userId/genres", (req, res) => {
   const userId = req.params.userId;
-  Liked_Genre.findAll({
+  LikedGenre.findAll({
     where: { user_id: userId },
   })
     .then((likedGenres) => {
@@ -146,7 +146,7 @@ usersRouter.get("/:userId/genres", (req, res) => {
 usersRouter.post("/:userId/genres", (req, res) => {
   const userId = req.params.userId;
   const { genreId } = req.query;
-  Liked_Genre.findOrCreate({
+  LikedGenre.findOrCreate({
     where: { user_id: userId, genre_id: genreId },
     defaults: { user_id: userId, genre_id: genreId },
   })
@@ -162,12 +162,12 @@ usersRouter.post("/:userId/genres", (req, res) => {
 usersRouter.delete("/:userId/genres", (req, res) => {
   const userId = req.params.userId;
   const { genreId } = req.query;
-  Liked_Genre.findOne({
+  LikedGenre.findOne({
     where: { user_id: userId, genre_id: genreId },
   })
     .then((likedGenre) => {
       if (likedGenre) {
-        Liked_Genre.destroy({
+        LikedGenre.destroy({
           where: { user_id: userId, genre_id: genreId },
         }).then(() => res.status(200).send(likedGenre));
       } else {
