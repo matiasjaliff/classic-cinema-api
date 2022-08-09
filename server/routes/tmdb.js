@@ -17,21 +17,18 @@ const authHeader = {
 // Requests
 
 // 01. Get API configuration
-tmdbRouter.get("/configuration", (req, res, next) => {
+tmdbRouter.get("/configuration", (req, res) => {
   axios
     .get(`${tmdbUrl}/configuration`, authHeader)
     .then((response) => {
       const tmdbConfig = response.data;
       res.status(200).send(tmdbConfig);
     })
-    .catch((error) => {
-      console.error(error.response.data);
-      next();
-    });
+    .catch((error) => console.error(error.response.data));
 });
 
 // 02. Get genres list
-tmdbRouter.get("/genres", (req, res, next) => {
+tmdbRouter.get("/genres", (req, res) => {
   const { language } = req.query;
   axios
     .get(`${tmdbUrl}/genre/movie/list?language=${language}`, authHeader)
@@ -39,14 +36,11 @@ tmdbRouter.get("/genres", (req, res, next) => {
       const genres = response.data;
       res.status(200).send(genres);
     })
-    .catch((error) => {
-      console.error(error.response.data);
-      next();
-    });
+    .catch((error) => console.error(error.response.data));
 });
 
 // 03. Search movies
-tmdbRouter.get("/search", (req, res, next) => {
+tmdbRouter.get("/search", (req, res) => {
   const { query, language, page, include_adult } = req.query;
   axios
     .get(
@@ -57,14 +51,11 @@ tmdbRouter.get("/search", (req, res, next) => {
       const movies = response.data;
       res.status(200).send(movies);
     })
-    .catch((error) => {
-      console.error(error.response.data);
-      next();
-    });
+    .catch((error) => console.error(error.response.data));
 });
 
 // 04. Get movie details
-tmdbRouter.get("/:movieId", (req, res, next) => {
+tmdbRouter.get("/:movieId", (req, res) => {
   const movieId = req.params.movieId;
   const { language } = req.query;
   axios
@@ -73,14 +64,11 @@ tmdbRouter.get("/:movieId", (req, res, next) => {
       const movieDetails = response.data;
       res.status(200).send(movieDetails);
     })
-    .catch((error) => {
-      console.error(error.response.data);
-      next();
-    });
+    .catch((error) => console.error(error.response.data));
 });
 
 // 05. Get recommendations
-tmdbRouter.get("/:movieId/recommendations", (req, res, next) => {
+tmdbRouter.get("/:movieId/recommendations", (req, res) => {
   const movieId = req.params.movieId;
   const { language, page } = req.query;
   axios
@@ -92,14 +80,11 @@ tmdbRouter.get("/:movieId/recommendations", (req, res, next) => {
       const movieRecommendations = response.data;
       res.status(200).send(movieRecommendations);
     })
-    .catch((error) => {
-      console.error(error.response.data);
-      next();
-    });
+    .catch((error) => console.error(error.response.data));
 });
 
 // 06. Get movie images
-tmdbRouter.get("/:movieId/images", (req, res, next) => {
+tmdbRouter.get("/:movieId/images", (req, res) => {
   const movieId = req.params.movieId;
   const { language } = req.query;
   axios
@@ -108,14 +93,11 @@ tmdbRouter.get("/:movieId/images", (req, res, next) => {
       const movieImages = response.data;
       res.status(200).send(movieImages);
     })
-    .catch((error) => {
-      console.error(error.response.data);
-      next();
-    });
+    .catch((error) => console.error(error.response.data));
 });
 
 // 07. Get movie videos
-tmdbRouter.get("/:movieId/videos", (req, res, next) => {
+tmdbRouter.get("/:movieId/videos", (req, res) => {
   const movieId = req.params.movieId;
   const { language } = req.query;
   axios
@@ -124,10 +106,7 @@ tmdbRouter.get("/:movieId/videos", (req, res, next) => {
       const movieVideos = response.data;
       res.status(200).send(movieVideos);
     })
-    .catch((error) => {
-      console.error(error.response.data);
-      next();
-    });
+    .catch((error) => console.error(error.response.data));
 });
 
 module.exports = tmdbRouter;

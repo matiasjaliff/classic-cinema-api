@@ -18,10 +18,19 @@ app.use(express.json()); // Uses express.json as body parser for every request
 app.use("/api", routes); // Uses routes for requests to /api
 
 // Error middleware
+app.use((req, res, next) => {
+  const err = new Error("ROUTE NOT FOUND");
+  err.status = 404;
+  next(err);
+});
+
+// Error handler
 app.use((err, req, res, next) => {
-  console.log("ERROR");
-  console.log(err);
-  res.status(500).send(err.message);
+  res.status(err.status || 500).json({
+    status: err.status,
+    name: err.name,
+    message: err.message,
+  });
 });
 
 db.sync({ alter: true }) // Syncrhonizes the database
