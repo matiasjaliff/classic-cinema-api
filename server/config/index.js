@@ -1,7 +1,9 @@
 // External modules
+
 const dotenv = require("dotenv");
 
-// Loads enviroment variables
+// Load enviroment variables
+
 dotenv.config();
 const enviroment = process.env;
 
