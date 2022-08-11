@@ -20,10 +20,9 @@ const getFollowedUsers = (req, res, next) => {
 const addFollowedUser = (req, res, next) => {
   const userId = req.params.userId;
   const { followedId } = req.query;
-
-  // Chequear que se ingresó un followed_id válido
-
-  followedId === userId
+  parseInt(followedId) <= 0 || !parseInt(followedId)
+    ? next(customErrors.invalidId())
+    : followedId === userId
     ? next(customErrors.relNotAllowed())
     : User.findByPk(followedId)
         .then((response) => (response ? true : false))
@@ -37,7 +36,7 @@ const addFollowedUser = (req, res, next) => {
                   ? res.sendStatus(201)
                   : next(customErrors.relAlreadyRegistered())
               )
-            : next(customErrors.userIdNotFound());
+            : next(customErrors.idNotFound());
         })
         .catch((err) => next(err));
 };
@@ -47,20 +46,19 @@ const addFollowedUser = (req, res, next) => {
 const removeFollowedUser = (req, res, next) => {
   const userId = req.params.userId;
   const { followedId } = req.query;
-
-  // Chequear que se ingresó un followed_id válido
-
-  Follow.findOne({
-    where: { follower_id: userId, followed_id: followedId },
-  })
-    .then((follow) =>
-      follow
-        ? Follow.destroy({
-            where: { follower_id: userId, followed_id: followedId },
-          }).then(() => res.sendStatus(200))
-        : next(customErrors.relNotFound())
-    )
-    .catch((err) => next(err));
+  parseInt(followedId) <= 0 || !parseInt(followedId)
+    ? next(customErrors.invalidId())
+    : Follow.findOne({
+        where: { follower_id: userId, followed_id: followedId },
+      })
+        .then((follow) =>
+          follow
+            ? Follow.destroy({
+                where: { follower_id: userId, followed_id: followedId },
+              }).then(() => res.sendStatus(200))
+            : next(customErrors.relNotFound())
+        )
+        .catch((err) => next(err));
 };
 
 module.exports = { getFollowedUsers, addFollowedUser, removeFollowedUser };

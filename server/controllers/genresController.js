@@ -19,17 +19,18 @@ const getLikedGenres = (req, res, next) => {
 const addLikedGenre = (req, res, next) => {
   const userId = req.params.userId;
   const { genreId } = req.query;
-
-  // Chequear que se ingresó un genre_id válido
-
-  LikedGenre.findOrCreate({
-    where: { user_id: userId, genre_id: genreId },
-    defaults: { user_id: userId, genre_id: genreId },
-  })
-    .then(([likedGenre, created]) =>
-      created ? res.sendStatus(201) : next(customErrors.relAlreadyRegistered())
-    )
-    .catch((err) => next(err));
+  parseInt(genreId) <= 0 || !parseInt(genreId)
+    ? next(customErrors.invalidId())
+    : LikedGenre.findOrCreate({
+        where: { user_id: userId, genre_id: genreId },
+        defaults: { user_id: userId, genre_id: genreId },
+      })
+        .then(([likedGenre, created]) =>
+          created
+            ? res.sendStatus(201)
+            : next(customErrors.relAlreadyRegistered())
+        )
+        .catch((err) => next(err));
 };
 
 // 3. Remove liked genre
@@ -37,20 +38,19 @@ const addLikedGenre = (req, res, next) => {
 const removeLikedGenre = (req, res, next) => {
   const userId = req.params.userId;
   const { genreId } = req.query;
-
-  // Chequear que se ingresó un genre_id válido
-
-  LikedGenre.findOne({
-    where: { user_id: userId, genre_id: genreId },
-  })
-    .then((likedGenre) =>
-      likedGenre
-        ? LikedGenre.destroy({
-            where: { user_id: userId, genre_id: genreId },
-          }).then(() => res.sendStatus(200))
-        : next(customErrors.relNotFound())
-    )
-    .catch((err) => next(err));
+  parseInt(genreId) <= 0 || !parseInt(genreId)
+    ? next(customErrors.invalidId())
+    : LikedGenre.findOne({
+        where: { user_id: userId, genre_id: genreId },
+      })
+        .then((likedGenre) =>
+          likedGenre
+            ? LikedGenre.destroy({
+                where: { user_id: userId, genre_id: genreId },
+              }).then(() => res.sendStatus(200))
+            : next(customErrors.relNotFound())
+        )
+        .catch((err) => next(err));
 };
 
 module.exports = { getLikedGenres, addLikedGenre, removeLikedGenre };

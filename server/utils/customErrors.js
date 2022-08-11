@@ -10,10 +10,10 @@ const customError = (code, message) => {
 
 const routeNotFound = () => customError(404, "Route not found.");
 
-const invalidUserId = () =>
-  customError(400, "Invalid user id. Must be a positive integer.");
+const invalidId = () =>
+  customError(400, "Invalid ID. Must be a positive integer.");
 
-const userIdNotFound = () => customError(404, "User id not found.");
+const idNotFound = () => customError(404, "ID not found.");
 
 const emailAlreadyInUse = () =>
   customError(409, "The email submitted is already in use.");
@@ -31,8 +31,8 @@ const attributeIsNotString = (attributeName) =>
 module.exports = {
   routeNotFound,
   emailAlreadyInUse,
-  invalidUserId,
-  userIdNotFound,
+  invalidId,
+  idNotFound,
   relAlreadyRegistered,
   relNotAllowed,
   relNotFound,
