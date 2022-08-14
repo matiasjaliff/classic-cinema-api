@@ -4,14 +4,14 @@ const express = require("express");
 
 // Own modules
 
-const usersRouter = require("./users");
+const userRouter = require("./user");
 const tmdbRouter = require("./tmdb");
 
 // Router instance and middlewares
 
 const router = express.Router();
 
-router.use("/users", usersRouter);
+router.use("/user", userRouter);
 router.use("/tmdb", tmdbRouter);
 
 module.exports = router;

@@ -1,23 +1,44 @@
+// External modules
+
+const Promise = require("bluebird");
+
 // Own modules
 
 const LikedMovie = require("../models/LikedMovie");
+const tmdbController = require("./tmdbController");
 const customErrors = require("../utils/customErrors");
 
 // 1. Get liked movies
 
-const getLikedMovies = (req, res, next) => {
-  const userId = req.params.userId;
+exports.getMovies = (req, res, next) => {
+  const userId = req.headers.userId;
   LikedMovie.findAll({
     where: { user_id: userId },
   })
-    .then((likedMovies) => res.status(200).send(likedMovies))
+    .then((likedMovies) =>
+      Promise.map(likedMovies, (likedMovie) =>
+        tmdbController.movieDetails(likedMovie.movie_id)
+      )
+    )
+    .then((moviesDetails) => res.status(200).send(moviesDetails))
     .catch((err) => next(err));
 };
 
+// ALTERNATIVA QUE SÓLO DEVUEVLE IDs (TAL VEZ MEJORA LA VELOCIDAD)
+
+// exports.getMovies = (req, res, next) => {
+//   const userId = req.headers.userId;
+//   LikedMovie.findAll({
+//     where: { user_id: userId },
+//   })
+//     .then((likedMovies) => res.status(200).send(likedMovies))
+//     .catch((err) => next(err));
+// };
+
 // 2. Add liked movie
 
-const addLikedMovie = (req, res, next) => {
-  const userId = req.params.userId;
+exports.addMovie = (req, res, next) => {
+  const userId = req.headers.userId;
   const { movieId } = req.query;
   parseInt(movieId) <= 0 || !parseInt(movieId)
     ? next(customErrors.invalidId())
@@ -35,8 +56,8 @@ const addLikedMovie = (req, res, next) => {
 
 // 3. Remove liked movie
 
-const removeLikedMovie = (req, res, next) => {
-  const userId = req.params.userId;
+exports.removeMovie = (req, res, next) => {
+  const userId = req.headers.userId;
   const { movieId } = req.query;
   parseInt(movieId) <= 0 || !parseInt(movieId)
     ? next(customErrors.invalidId())
@@ -52,5 +73,3 @@ const removeLikedMovie = (req, res, next) => {
         )
         .catch((err) => next(err));
 };
-
-module.exports = { getLikedMovies, addLikedMovie, removeLikedMovie };

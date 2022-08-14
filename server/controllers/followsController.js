@@ -6,8 +6,8 @@ const customErrors = require("../utils/customErrors");
 
 // 1. Get followed users
 
-const getFollowedUsers = (req, res, next) => {
-  const userId = req.params.userId;
+exports.getFollowed = (req, res, next) => {
+  const userId = req.headers.userId;
   Follow.findAll({
     where: { follower_id: userId },
   })
@@ -17,8 +17,8 @@ const getFollowedUsers = (req, res, next) => {
 
 // 2. Add followed user
 
-const addFollowedUser = (req, res, next) => {
-  const userId = req.params.userId;
+exports.addFollowed = (req, res, next) => {
+  const userId = req.headers.userId;
   const { followedId } = req.query;
   parseInt(followedId) <= 0 || !parseInt(followedId)
     ? next(customErrors.invalidId())
@@ -43,8 +43,8 @@ const addFollowedUser = (req, res, next) => {
 
 // 3. Remove followed user
 
-const removeFollowedUser = (req, res, next) => {
-  const userId = req.params.userId;
+exports.removeFollowed = (req, res, next) => {
+  const userId = req.headers.userId;
   const { followedId } = req.query;
   parseInt(followedId) <= 0 || !parseInt(followedId)
     ? next(customErrors.invalidId())
@@ -60,5 +60,3 @@ const removeFollowedUser = (req, res, next) => {
         )
         .catch((err) => next(err));
 };
-
-module.exports = { getFollowedUsers, addFollowedUser, removeFollowedUser };

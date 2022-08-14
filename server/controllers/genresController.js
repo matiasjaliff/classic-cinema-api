@@ -5,8 +5,8 @@ const customErrors = require("../utils/customErrors");
 
 // 1. Get liked genres
 
-const getLikedGenres = (req, res, next) => {
-  const userId = req.params.userId;
+exports.getGenres = (req, res, next) => {
+  const userId = req.headers.userId;
   LikedGenre.findAll({
     where: { user_id: userId },
   })
@@ -16,8 +16,8 @@ const getLikedGenres = (req, res, next) => {
 
 // 2. Add liked genre
 
-const addLikedGenre = (req, res, next) => {
-  const userId = req.params.userId;
+exports.addGenre = (req, res, next) => {
+  const userId = req.headers.userId;
   const { genreId } = req.query;
   parseInt(genreId) <= 0 || !parseInt(genreId)
     ? next(customErrors.invalidId())
@@ -35,8 +35,8 @@ const addLikedGenre = (req, res, next) => {
 
 // 3. Remove liked genre
 
-const removeLikedGenre = (req, res, next) => {
-  const userId = req.params.userId;
+exports.removeGenre = (req, res, next) => {
+  const userId = req.headers.userId;
   const { genreId } = req.query;
   parseInt(genreId) <= 0 || !parseInt(genreId)
     ? next(customErrors.invalidId())
@@ -52,5 +52,3 @@ const removeLikedGenre = (req, res, next) => {
         )
         .catch((err) => next(err));
 };
-
-module.exports = { getLikedGenres, addLikedGenre, removeLikedGenre };
