@@ -3,6 +3,7 @@
 const express = require("express");
 const morgan = require("morgan");
 const cookieParser = require("cookie-parser");
+const cors = require("cors");
 
 // Own modules
 
@@ -21,6 +22,7 @@ const app = express();
 
 // Middlewares
 
+app.use(cors());
 app.use(morgan("dev")); // Uses morgan to log every request
 app.use(express.json()); // Uses express.json as body parser for every request
 app.use(cookieParser()); // Uses cookie-parser for every request
