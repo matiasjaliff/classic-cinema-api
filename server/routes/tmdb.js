@@ -46,6 +46,35 @@ tmdbRouter.get("/genres", (req, res, next) => {
     .catch((err) => next(err));
 });
 
+// 3. Get featured movie
+
+tmdbRouter.get("/featured", (req, res, next) => {
+  const year = Math.ceil(Math.random() * (2022 - 1950) + 1950);
+  axios
+    .get(
+      `${tmdbUrl}/discover/movie?primary_release_year=${year}&sort_by=popularity.desc`,
+      authHeader
+    )
+    .then((response) => {
+      const featuredMovies = response.data.results;
+      const selectedMovie = Math.trunc(featuredMovies.length * Math.random());
+      res.status(200).send(featuredMovies[selectedMovie]);
+    })
+    .catch((err) => next(err));
+});
+
+// 8. Get movies in theaters
+
+tmdbRouter.get("/inTheaters", (req, res, next) => {
+  axios
+    .get(`${tmdbUrl}/discover/movie`, authHeader)
+    .then((response) => {
+      const moviesList = response.data.results;
+      res.status(200).send(moviesList);
+    })
+    .catch((err) => next(err));
+});
+
 // 3. Search movies
 
 tmdbRouter.get("/search", (req, res, next) => {
