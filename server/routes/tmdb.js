@@ -2,6 +2,7 @@
 
 const express = require("express");
 const axios = require("axios");
+const Promise = require("bluebird");
 
 // Load enviroment variables
 
@@ -63,19 +64,31 @@ tmdbRouter.get("/featured", (req, res, next) => {
     .catch((err) => next(err));
 });
 
-// 8. Get movies in theaters
+// 4. Get movies in theaters (needed: ids and image paths)
 
 tmdbRouter.get("/inTheaters", (req, res, next) => {
   axios
     .get(`${tmdbUrl}/discover/movie`, authHeader)
     .then((response) => {
       const moviesList = response.data.results;
-      res.status(200).send(moviesList);
+      const moviesIdList = moviesList.map((movie) => movie.id);
+      console.log(moviesIdList);
+      return moviesIdList;
     })
+    .then((moviesIdList) =>
+      Promise.map(moviesIdList, (movieId) =>
+        axios.get(`${tmdbUrl}/movie/${movieId}/images?language=en`, authHeader)
+      )
+    )
+    .then((response) =>
+      response.map((individualResponse) => individualResponse.data)
+    )
+    .then((images) => images.filter((image) => image.posters.length >= 1))
+    .then((images) => res.status(200).send(images))
     .catch((err) => next(err));
 });
 
-// 3. Search movies
+// 5. Search movies
 
 tmdbRouter.get("/search", (req, res, next) => {
   const { query, language, page, include_adult } = req.query;
@@ -91,7 +104,7 @@ tmdbRouter.get("/search", (req, res, next) => {
     .catch((err) => next(err));
 });
 
-// 4. Get movie details
+// 6. Get movie details
 
 tmdbRouter.get("/:movieId", (req, res, next) => {
   const movieId = req.params.movieId;
@@ -105,7 +118,7 @@ tmdbRouter.get("/:movieId", (req, res, next) => {
     .catch((err) => next(err));
 });
 
-// 5. Get recommendations
+// 7. Get recommendations
 
 tmdbRouter.get("/:movieId/recommendations", (req, res, next) => {
   const movieId = req.params.movieId;
@@ -116,13 +129,27 @@ tmdbRouter.get("/:movieId/recommendations", (req, res, next) => {
       authHeader
     )
     .then((response) => {
-      const movieRecommendations = response.data;
-      res.status(200).send(movieRecommendations);
+      const movieRecommendations = response.data.results;
+      const movieRecommendationsIdList = movieRecommendations.map(
+        (movie) => movie.id
+      );
+      console.log(movieRecommendationsIdList);
+      return movieRecommendationsIdList;
     })
+    .then((movieRecommendationsIdList) =>
+      Promise.map(movieRecommendationsIdList, (movieId) =>
+        axios.get(`${tmdbUrl}/movie/${movieId}/images?language=en`, authHeader)
+      )
+    )
+    .then((response) =>
+      response.map((individualResponse) => individualResponse.data)
+    )
+    .then((images) => images.filter((image) => image.posters.length >= 1))
+    .then((images) => res.status(200).send(images))
     .catch((err) => next(err));
 });
 
-// 6. Get movie images
+// 8. Get movie images
 
 tmdbRouter.get("/:movieId/images", (req, res, next) => {
   const movieId = req.params.movieId;
@@ -136,7 +163,7 @@ tmdbRouter.get("/:movieId/images", (req, res, next) => {
     .catch((err) => next(err));
 });
 
-// 7. Get movie videos
+// 9. Get movie videos
 
 tmdbRouter.get("/:movieId/videos", (req, res, next) => {
   const movieId = req.params.movieId;
@@ -146,6 +173,33 @@ tmdbRouter.get("/:movieId/videos", (req, res, next) => {
     .then((response) => {
       const movieVideos = response.data;
       res.status(200).send(movieVideos);
+    })
+    .catch((err) => next(err));
+});
+
+// 10. Get movie credits
+
+tmdbRouter.get("/:movieId/credits", (req, res, next) => {
+  const movieId = req.params.movieId;
+  const { language } = req.query;
+  axios
+    .get(`${tmdbUrl}/movie/${movieId}/credits?language=${language}`, authHeader)
+    .then((response) => {
+      const movieCredits = response.data;
+      res.status(200).send(movieCredits);
+    })
+    .catch((err) => next(err));
+});
+
+// 11. Get movie release dates
+
+tmdbRouter.get("/:movieId/release", (req, res, next) => {
+  const movieId = req.params.movieId;
+  axios
+    .get(`${tmdbUrl}/movie/${movieId}/release_dates`, authHeader)
+    .then((response) => {
+      const movieReleaseDates = response.data.results;
+      res.status(200).send(movieReleaseDates);
     })
     .catch((err) => next(err));
 });
