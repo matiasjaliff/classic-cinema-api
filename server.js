@@ -14,7 +14,9 @@ const customErrors = require("./utils/customErrors");
 
 // Load enviroment variables
 
-const { port } = require("./config");
+// const { port } = require("./config");
+
+const port = process.env.PORT || 8080;
 
 // Express instance
 
